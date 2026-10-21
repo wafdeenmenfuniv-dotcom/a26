@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>اختبار الفصل: علم النفس الرياضي</title>
+<style>
+:root{--bg:#f3f6fb;--card:#fff;--ink:#172033;--muted:#667085;--blue:#3157d5;--line:#dfe5f0;--green:#16794b;--greenbg:#eaf8f0;--red:#b42318;--redbg:#fff0ef}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.8 Tahoma,Arial,sans-serif}
+main{width:min(900px,92%);margin:28px auto 50px}header{text-align:center;margin-bottom:22px}.tag{display:inline-block;background:#e8edff;color:#2444b2;padding:4px 14px;border-radius:30px;font-size:.9rem;font-weight:bold}
+h1{font-size:clamp(1.6rem,4vw,2.4rem);margin:10px 0 3px}.sub,.muted{color:var(--muted)}.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:clamp(18px,4vw,30px);box-shadow:0 12px 34px #17203310;margin-bottom:18px}
+.hidden{display:none!important}.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}label.field{display:block;font-weight:bold;margin-bottom:6px}
+input[type=text]{width:100%;padding:13px;border:1px solid #cbd5e1;border-radius:11px;font:inherit;outline:none}input[type=text]:focus{border-color:var(--blue);box-shadow:0 0 0 3px #3157d51a}
+button{font:inherit;font-weight:bold;border:0;border-radius:11px;padding:11px 19px;cursor:pointer}button:disabled{opacity:.5;cursor:not-allowed}.primary{background:var(--blue);color:#fff}.secondary{background:#edf1f7;color:var(--ink)}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
+.progress{height:8px;border-radius:20px;background:#e8edf5;overflow:hidden;margin:15px 0 22px}.bar{height:100%;width:0;background:linear-gradient(90deg,#3157d5,#7d96ff);transition:width .2s}
+.top{display:flex;justify-content:space-between;gap:12px;align-items:center}.counter{font-weight:bold;color:#2444b2}.q{font-size:1.15rem;font-weight:bold;margin:0 0 15px}
+.options{display:grid;gap:10px}.option{display:flex;gap:11px;align-items:flex-start;padding:12px 14px;border:1px solid var(--line);border-radius:12px;cursor:pointer}.option:hover{background:#f8faff;border-color:#a9b9ee}.option input{margin-top:8px;accent-color:var(--blue)}.option.selected{background:#f0f4ff;border-color:var(--blue)}.option.correct{background:var(--greenbg);border-color:var(--green)}.option.wrong{background:var(--redbg);border-color:var(--red)}
+.feedback{padding:13px 15px;border-radius:12px;margin-top:16px}.good{background:var(--greenbg);color:#11613c}.bad{background:var(--redbg);color:#912018}.nav{display:flex;justify-content:space-between;gap:12px;margin-top:22px}.score{text-align:center;font-size:3.3rem;font-weight:800;color:var(--blue)}.resultbox{background:#f7f9fd;border-radius:12px;padding:14px;margin:18px 0}.review{border-top:1px solid var(--line);padding:12px 0}.review:first-child{border-top:0}.correctText{color:var(--green);font-weight:bold}.small{font-size:.9rem;color:var(--muted)}@media(max-width:620px){.grid{grid-template-columns:1fr}.top{align-items:flex-start;flex-direction:column}.nav{flex-direction:column-reverse}.nav button{width:100%}}
+</style>
+</head>
+<body>
+<main>
+<header><span class="tag">اختبار إلكتروني تفاعلي</span><h1>اختبار الفصل: علم النفس الرياضي</h1><p class="sub">10 أسئلة اختيار من متعدد مع تغذية راجعة فورية</p></header>
+<section class="card" id="start">
+<h2>بيانات الطالب</h2><p>اكتب اسمك والرقم الأكاديمي ثم اضغط على زر بدء الاختبار.</p>
+<form id="studentForm" novalidate>
+<div class="grid">
+<div><label class="field" for="studentName">اسم الطالب</label><input id="studentName" type="text" autocomplete="name" placeholder="اكتب اسمك بالكامل" required></div>
+<div><label class="field" for="studentId">الرقم الأكاديمي</label><input id="studentId" type="text" inputmode="numeric" placeholder="اكتب الرقم الأكاديمي" required></div>
+</div>
+<div class="actions"><button class="primary" id="startBtn" type="submit">ابدأ الاختبار</button></div>
+<p class="small" id="formMessage" role="alert"></p>
+<p class="small">البيانات والنتائج لا تُرسل إلى أي خادم؛ تعمل هذه الصفحة داخل المتصفح فقط.</p>
+</form></section>
+<section class="card hidden" id="quiz" aria-live="polite">
+<div class="top"><div><strong id="hello"></strong><div class="small" id="studentNumber"></div></div><div class="counter" id="counter"></div></div>
+<div class="progress"><div class="bar" id="bar"></div></div><div id="questionArea"></div>
+<div class="nav"><button class="secondary" id="prev">السؤال السابق</button><button class="primary" id="next">تحقق من الإجابة</button></div>
+<p class="small">اختر إجابة ثم اضغط «تحقق من الإجابة». بعد التحقق ستظهر التغذية الراجعة ولن يمكن تغيير إجابة السؤال.</p>
+</section>
+<section class="card hidden" id="result" aria-live="polite"><h2 style="text-align:center">انتهى الاختبار</h2><div class="score" id="score"></div><p id="message" style="text-align:center"></p><div class="resultbox" id="details"></div><div id="review"></div><div class="actions"><button class="primary" id="print">طباعة النتيجة</button><button class="secondary" id="restart">إعادة الاختبار</button></div><p class="small">النتيجة معروضة في هذه الصفحة فقط ولا يتم حفظها مركزيًا.</p></section>
+</main>
+<script>
+(function(){
+"use strict";
+const questions = [
+{q:"ما الموضوع الأساسي الذي يهتم علم النفس الرياضي بدراسته؟",o:["السلوك الإنساني والعوامل النفسية في المجال الرياضي","التغذية الرياضية وتركيب الأغذية","القوانين المنظمة للمنافسات الرياضية","تصميم المنشآت والملاعب الرياضية"],a:0,f:["يدرس علم النفس الرياضي السلوك والعوامل النفسية المؤثرة في الأداء الرياضي.","التغذية مجال مهم لكنها ليست الموضوع الأساسي لهذا التخصص.","القوانين تنظم المنافسات، بينما يركز هذا التخصص على السلوك والعوامل النفسية.","تصميم المنشآت مجال هندسي وليس موضوع علم النفس الرياضي."]},
+{q:"من الباحث الذي يُعرف أحيانًا بأنه «أبو علم النفس الرياضي» في الولايات المتحدة؟",o:["نورمان تريبليت","كولمان جريفيث","أرسطو","رينيه ديكارت"],a:1,f:["درس تريبليت تأثير وجود الآخرين في الأداء، لكنه ليس المقصود بهذا اللقب.","ارتبط جريفيث بتأسيس أحد أوائل مختبرات علم النفس الرياضي ويُعرف بهذا اللقب في الولايات المتحدة.","قدّم أرسطو أفكارًا فلسفية عن الجسم والنفس، لكنه ليس المقصود بهذا اللقب.","أسهم ديكارت في الدراسات النفسية، لكنه ليس صاحب اللقب المذكور."]},
+{q:"أي مجموعة تمثل الأهداف العلمية العامة لعلم النفس الواردة في الفصل؟",o:["الوصف والتصنيف والتوثيق","التدريب والتغذية والاستشفاء","الفهم والتفسير والتنبؤ والضبط والتحكم","المنافسة والفوز وتحطيم الأرقام"],a:2,f:["هذه عمليات علمية عامة لكنها ليست المجموعة المحددة في الفصل.","هذه موضوعات مرتبطة بالإعداد الرياضي وليست الأهداف العلمية المقصودة.","هذه هي الأهداف العلمية العامة الواردة في الفصل، إلى جانب تعزيز الصحة النفسية.","هذه نتائج رياضية محتملة وليست أهداف العلم العامة."]},
+{q:"أي مما يلي يُعد هدفًا لعلم النفس الرياضي يتعلق بالصحة النفسية؟",o:["تعزيز الرفاه النفسي والوقاية من الاحتراق النفسي","زيادة عدد المباريات خلال الموسم","إلغاء الفروق الفردية بين اللاعبين","التركيز على الإعداد البدني وحده"],a:0,f:["يسعى المجال إلى دعم الصحة النفسية والوقاية من الاحتراق النفسي والاضطرابات الانفعالية.","زيادة المباريات قرار تنظيمي وليست هدفًا للصحة النفسية بحد ذاتها.","الفروق الفردية حقيقة ينبغي مراعاتها لا إلغاؤها.","يهتم علم النفس الرياضي بالجوانب النفسية إلى جانب الجوانب البدنية."]},
+{q:"ما المقصود بهدف «التنبؤ بالسلوك» في علم النفس الرياضي؟",o:["تغيير قواعد اللعبة قبل المنافسة","تقدير سلوك الرياضي واستجاباته المستقبلية في المواقف التنافسية","تحديد نوع الغذاء المناسب لكل لاعب فقط","قياس زمن السباق بعد انتهائه دون توقع"],a:1,f:["تغيير القواعد ليس المقصود بالتنبؤ بالسلوك.","يستخدم التنبؤ المعلومات والقياسات لتقدير استجابات الرياضي في مواقف مستقبلية.","التغذية وحدها لا تمثل التنبؤ بالسلوك النفسي.","قياس نتيجة حدثت بالفعل لا يعد توقعًا لسلوك مستقبلي."]},
+{q:"أي مبدأ يؤكد ضرورة مراعاة اختلاف القدرات والدوافع والسمات الشخصية بين اللاعبين؟",o:["الاستمرارية","الإثابة","الفروق الفردية","معرفة النتائج"],a:2,f:["الاستمرارية تعني انتظام التدريب عبر الزمن.","الإثابة تعزز الأداء المرغوب ولا تصف اختلاف اللاعبين.","الفروق الفردية تعني اختلاف الاستعدادات والقدرات والدوافع والسمات بين الأفراد.","معرفة النتائج تعني إطلاع اللاعب على نتائج أدائه ومتابعتها."]},
+{q:"لماذا يُعد مبدأ الخصوصية مهمًا في التدريب الرياضي؟",o:["لأن جميع الأنشطة الرياضية تتطلب المهارات نفسها","لأن التدريب يجب أن يتوقف بعد انتهاء الموسم","لأن اللاعبين يجب أن يتلقوا أحمالًا متطابقة دائمًا","لأن الأنشطة والمراكز تختلف في متطلباتها البدنية والعقلية والانفعالية"],a:3,f:["تختلف الأنشطة الرياضية في مهاراتها ومتطلباتها.","الاستمرارية تؤكد انتظام التدريب، ولا تدعو إلى توقفه بعد الموسم.","ينبغي أن تراعي الأحمال الفروق الفردية ومتطلبات النشاط.","اختلاف المهارات والأهداف ومراكز اللعب يجعل من الضروري تخصيص التدريب وفقًا للمتطلبات."]},
+{q:"أي إجراء يعبّر عن مبدأ معرفة النتائج؟",o:["تسجيل نتائج أداء اللاعب ومتابعتها خلال التدريب وبعده","تقديم مكافأة دون توضيح الأداء المقصود","زيادة الحمل التدريبي بصورة مفاجئة","تجاهل نتائج الأداء السابقة"],a:0,f:["تسجيل النتائج وتتبعها يساعدان في معرفة مستوى الأداء وتطوره.","هذا لا يوضح النتائج، وقد يرتبط بالإثابة بصورة غير محددة.","الزيادة المفاجئة في الحمل لا تعبّر عن معرفة النتائج وقد تسبب مشكلات في التكيف.","تجاهل النتائج يتعارض مع تسجيلها ومتابعتها لتطوير الأداء."]},
+{q:"وفق مبدأ الإثابة، متى يكون التعزيز أكثر فاعلية عادةً؟",o:["عندما يتأخر طويلًا عن الأداء","عندما يكون قريبًا زمنيًا من الأداء أو النتيجة","عندما لا يعرف اللاعب سبب المكافأة","عندما يُقدّم دون ارتباط بالأداء"],a:1,f:["التأخير الطويل يضعف الصلة بين الأداء والتعزيز.","تكون الإثابة أكثر فاعلية عندما تأتي قريبًا من الأداء مع توضيح الأداء المقصود.","ينبغي أن يعرف اللاعب أي أداء أو نتيجة يجري تعزيزها.","تكون الإثابة أوضح فاعلية عندما ترتبط بأداء واضح."]},
+{q:"أي مما يلي يُعد من مجالات تطبيق علم النفس الرياضي الواردة في الفصل؟",o:["هندسة الطرق والجسور","المحاسبة المالية","إعادة التأهيل بعد الإصابات","التصميم المعماري للمباني"],a:2,f:["هندسة الطرق والجسور ليست من المجالات المذكورة.","المحاسبة المالية ليست من المجالات الواردة في الفصل.","إعادة التأهيل بعد الإصابات من مجالات تطبيق علم النفس الرياضي.","التصميم المعماري لا يندرج ضمن المجالات المذكورة."]}
+];
+const $ = id => document.getElementById(id);
+let name="", sid="", index=0, answers=Array(questions.length).fill(null), locked=Array(questions.length).fill(false);
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function startQuiz(event){
+ if(event) event.preventDefault();
+ name=$("studentName").value.trim(); sid=$("studentId").value.trim();
+ if(!name || !sid){$("formMessage").textContent="من فضلك اكتب اسم الطالب والرقم الأكاديمي في الحقلين أولًا."; if(!name) $("studentName").focus(); else $("studentId").focus(); return;}
+ $("formMessage").textContent="";
+ $("hello").textContent="مرحبًا، "+name;
+ $("studentNumber").textContent="الرقم الأكاديمي: "+sid;
+ $("start").classList.add("hidden"); $("result").classList.add("hidden"); $("quiz").classList.remove("hidden");
+ index=0; render(); window.scrollTo(0,0);
+}
+function render(){
+ const q=questions[index]; $("counter").textContent=`السؤال ${index+1} من ${questions.length}`;
+ $("bar").style.width=(index/questions.length*100)+"%"; $("prev").disabled=index===0;
+ let options=q.o.map((text,i)=>{
+  let cls="option"+(answers[index]===i?" selected":"");
+  if(locked[index]&&i===q.a) cls+=" correct";
+  if(locked[index]&&answers[index]===i&&i!==q.a) cls+=" wrong";
+  return `<label class="${cls}"><input type="radio" name="answer" value="${i}" ${answers[index]===i?"checked":""} ${locked[index]?"disabled":""}><span><b>${["أ","ب","ج","د"][i]}.</b> ${esc(text)}</span></label>`;
+ }).join("");
+ let fb="";
+ if(locked[index]){
+  const ok=answers[index]===q.a;
+  fb=`<div class="feedback ${ok?"good":"bad"}"><strong>${ok?"أحسنت! إجابة صحيحة.":"ليست الإجابة الصحيحة."}</strong>${esc(q.f[answers[index]])}${ok?"":`<p><b>التوضيح:</b> ${esc(q.f[q.a])}</p>`}</div>`;
+ }
+ $("questionArea").innerHTML=`<h2 class="q">${esc(q.q)}</h2><div class="options">${options}</div>${fb}`;
+ $("questionArea").querySelectorAll('input[name="answer"]').forEach(input=>input.addEventListener("change",e=>{if(!locked[index]){answers[index]=Number(e.target.value);render();}}));
+ $("next").textContent=locked[index]?(index===questions.length-1?"عرض النتيجة":"السؤال التالي"):"تحقق من الإجابة";
+}
+function next(){
+ if(!locked[index]){
+  if(answers[index]===null){alert("يرجى اختيار إجابة أولًا.");return;}
+  locked[index]=true;render();return;
+ }
+ if(index<questions.length-1){index++;render();window.scrollTo(0,0);}else showResult();
+}
+function showResult(){
+ const score=answers.reduce((s,a,i)=>s+(a===questions[i].a?1:0),0), pct=Math.round(score/questions.length*100);
+ $("quiz").classList.add("hidden");$("result").classList.remove("hidden");$("score").textContent=`${score} / ${questions.length}`;
+ $("message").textContent=pct>=90?"ممتاز! لديك إتقان مرتفع لمحتوى الفصل.":pct>=70?"جيد جدًا! راجع النقاط التي أخطأت فيها.":pct>=50?"أداء مقبول؛ راجع المفاهيم الأساسية ومبادئ علم النفس الرياضي.":"يُنصح بمراجعة الفصل ثم خوض الاختبار مرة أخرى.";
+ $("details").innerHTML=`<p><b>اسم الطالب:</b> ${esc(name)}</p><p><b>الرقم الأكاديمي:</b> ${esc(sid)}</p><p><b>النسبة المئوية:</b> ${pct}%</p><p><b>الإجابات الصحيحة:</b> ${score} من ${questions.length}</p>`;
+ $("review").innerHTML="<h3>مراجعة الإجابات</h3>"+questions.map((q,i)=>`<div class="review"><b>${i+1}. ${esc(q.q)}</b><p class="muted">إجابتك: ${esc(q.o[answers[i]])}</p><p class="correctText">الإجابة الصحيحة: ${esc(q.o[q.a])}</p><p>${esc(q.f[q.a])}</p></div>`).join("");
+ window.scrollTo(0,0);
+}
+function restart(){
+ index=0;answers=Array(questions.length).fill(null);locked=Array(questions.length).fill(false);
+ $("studentName").value="";$("studentId").value="";$("result").classList.add("hidden");$("quiz").classList.add("hidden");$("start").classList.remove("hidden");$("formMessage").textContent="";window.scrollTo(0,0);
+}
+$("studentForm").addEventListener("submit",startQuiz);
+$("startBtn").addEventListener("click",function(e){/* submit event handles the form */});
+$("next").addEventListener("click",next);$("prev").addEventListener("click",()=>{if(index>0){index--;render();}});
+$("print").addEventListener("click",()=>window.print());$("restart").addEventListener("click",restart);
+})();
+</script>
+</body>
+</html>
